@@ -466,6 +466,53 @@ const tools = [
     },
   },
   {
+    name: "reverse_video",
+    description: "Reverse video playback (play backwards)",
+    inputSchema: {
+      type: "object",
+      properties: {
+        input: { type: "string", description: "Input video file path" },
+        output: { type: "string", description: "Output video file path" },
+        reverse_audio: { 
+          type: "boolean", 
+          description: "Also reverse the audio track",
+          default: true 
+        }
+      },
+      required: ["input", "output"],
+    },
+  },
+  {
+    name: "apply_video_filter",
+    description: "Apply custom video and audio filters to media files",
+    inputSchema: {
+      type: "object",
+      properties: {
+        input: { type: "string", description: "Input file path" },
+        output: { type: "string", description: "Output file path" },
+        video_filter: { 
+          type: "string", 
+          description: "Video filter string (e.g., 'reverse', 'scale=640:480', 'blur=5')" 
+        },
+        audio_filter: { 
+          type: "string", 
+          description: "Audio filter string (e.g., 'areverse', 'volume=0.5')" 
+        },
+        video_codec: { 
+          type: "string", 
+          description: "Video codec (e.g., libx264, libx265)",
+          default: "libx264"
+        },
+        audio_codec: { 
+          type: "string", 
+          description: "Audio codec (e.g., aac, mp3)",
+          default: "aac"
+        }
+      },
+      required: ["input", "output"],
+    },
+  },
+  {
     name: "create_thumbnail",
     description: "Create thumbnail images from video",
     inputSchema: {
@@ -933,6 +980,45 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             "-y", args.output
           ];
         }
+        break;
+      }
+
+      case "reverse_video": {
+        if (args.reverse_audio) {
+          // Reverse both video and audio
+          ffmpegArgs = [
+            "-i", args.input,
+            "-vf", "reverse",
+            "-af", "areverse",
+            "-y", args.output
+          ];
+        } else {
+          // Reverse only video, maintain original audio
+          ffmpegArgs = [
+            "-i", args.input,
+            "-vf", "reverse",
+            "-y", args.output
+          ];
+        }
+        break;
+      }
+
+      case "apply_video_filter": {
+        ffmpegArgs = ["-i", args.input];
+        
+        if (args.video_filter) {
+          ffmpegArgs.push("-vf", args.video_filter);
+        }
+        
+        if (args.audio_filter) {
+          ffmpegArgs.push("-af", args.audio_filter);
+        }
+        
+        // Add codecs
+        ffmpegArgs.push("-c:v", args.video_codec || "libx264");
+        ffmpegArgs.push("-c:a", args.audio_codec || "aac");
+        
+        ffmpegArgs.push("-y", args.output);
         break;
       }
 
