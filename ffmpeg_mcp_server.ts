@@ -599,11 +599,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         
         // Use Whisper to transcribe
+        const outputDir = path.dirname(args.output) || '.';
         const whisperArgs = [
           tempAudioFile,
           "--model", args.model || "base",
           "--output_format", "srt",
-          "--output_dir", path.dirname(args.output)
+          "--output_dir", outputDir
         ];
         
         if (args.language) {
@@ -653,18 +654,33 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           throw new Error(`Whisper transcription failed: ${whisperResult.stderr}`);
         }
         
-        // Whisper creates filename based on input, rename to desired output
-        const whisperOutput = tempAudioFile.replace('.wav', '.srt');
-        try {
-          await fs.rename(whisperOutput, args.output);
-        } catch {
-          // If rename fails, try to copy the content
+        // Whisper creates filename based on input audio file basename
+        const audioBasename = path.basename(tempAudioFile, '.wav');
+        const whisperOutput = path.join(outputDir, audioBasename + '.srt');
+        
+        // Check if file exists in the expected location
+        if (await fileExists(whisperOutput)) {
           try {
+            await fs.rename(whisperOutput, args.output);
+          } catch {
+            // If rename fails, try to copy the content
             const content = await fs.readFile(whisperOutput, 'utf8');
             await fs.writeFile(args.output, content);
             await fs.unlink(whisperOutput);
-          } catch (copyError) {
-            throw new Error(`Failed to save subtitle file: ${copyError}`);
+          }
+        } else {
+          // Whisper might have created file in current directory, check there too
+          const currentDirOutput = audioBasename + '.srt';
+          if (await fileExists(currentDirOutput)) {
+            try {
+              await fs.rename(currentDirOutput, args.output);
+            } catch {
+              const content = await fs.readFile(currentDirOutput, 'utf8');
+              await fs.writeFile(args.output, content);
+              await fs.unlink(currentDirOutput);
+            }
+          } else {
+            throw new Error(`Whisper output file not found in expected locations: ${whisperOutput} or ${currentDirOutput}`);
           }
         }
         
