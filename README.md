@@ -1,10 +1,14 @@
 # FFmpeg MCP Server - Comprehensive
 
+> **⚠️ EXPLORATION ONLY - NOT FOR PRODUCTION USE**
+> 
+> This repository is provided for exploration and learning purposes only. It is **not suitable for use in any production workflows**. The repository is not actively monitored for issues and is not being actively developed or maintained.
+
 A comprehensive Model Context Protocol (MCP) server for FFmpeg that provides extensive video and audio processing capabilities. This server exposes the most commonly used FFmpeg operations through a simple tool interface.
 
 ## Features
 
-This MCP server provides 15 powerful tools covering the most common FFmpeg operations:
+This MCP server provides 18 powerful tools covering the most common FFmpeg operations:
 
 ### Video Operations
 - **Format Conversion** - Convert between video formats (MP4, AVI, MOV, WebM, etc.)
@@ -17,6 +21,8 @@ This MCP server provides 15 powerful tools covering the most common FFmpeg opera
 - **Frame Extraction** - Extract individual frames as images
 - **Thumbnail Creation** - Generate thumbnail images from videos
 - **Subtitle Addition** - Add subtitles (embed or burn-in)
+- **Custom Video Filters** - Apply arbitrary FFmpeg filters for advanced processing
+- **Video Reversal** - Play videos backwards with optional audio reversal
 
 ### Audio Operations
 - **Audio Extraction** - Extract audio from videos in various formats (MP3, WAV, AAC, OGG, FLAC)
@@ -26,6 +32,7 @@ This MCP server provides 15 powerful tools covering the most common FFmpeg opera
 ### Utility Operations
 - **Media Information** - Get detailed format and stream information
 - **GIF Creation** - Convert video clips to animated GIFs
+- **Subtitle Generation** - Generate automatic subtitles using OpenAI Whisper
 
 ## Prerequisites
 
@@ -123,6 +130,16 @@ Cut video from 00:01:30 to 00:03:45
 Create a 5-second GIF from video starting at 00:00:10
 ```
 
+### Generate AI Subtitles
+```
+Generate automatic subtitles from video audio using Whisper
+```
+
+### Apply Custom Filters
+```
+Apply blur filter to video with custom FFmpeg filter string
+```
+
 ## Advanced Features
 
 ### Quality Control
@@ -173,6 +190,9 @@ The server includes comprehensive error handling:
 | `adjust_volume` | Volume control | `input`, `output`, `volume` |
 | `normalize_audio` | Level normalization | `input`, `output`, `method` |
 | `create_thumbnail` | Thumbnail generation | `input`, `output`, `time` |
+| `apply_video_filter` | Custom FFmpeg filters | `input`, `output`, `video_filter` |
+| `reverse_video` | Video reversal | `input`, `output`, `reverse_audio` |
+| `generate_subtitles` | AI subtitle generation | `input`, `output`, `language`, `model` |
 
 ## Troubleshooting
 
@@ -193,10 +213,6 @@ The server includes comprehensive error handling:
 ## Contributing
 
 This server is designed to cover the most common FFmpeg use cases. For additional features or bug reports, please open an issue or submit a pull request.
-
-## License
-
-MIT License - see LICENSE file for details.
 
 ## Acknowledgments
 
